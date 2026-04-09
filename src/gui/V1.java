@@ -221,5 +221,5 @@ public class V1 extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(this, "EL producto " + nom + " no se encuentra en la lista o no existe");
 		}
 	}
-	}
+	}.
 }
