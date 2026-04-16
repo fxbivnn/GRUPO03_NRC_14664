@@ -1,17 +1,18 @@
 package clases;
 
-public class Productos {
+public class ProductosLlevar {
 	private String nombre, fechaVencimiento;
 	private double precio;
-	private int stock;
+	private int cant;
+	public static double precioListar = 0;
 	
 
-	public Productos(String nombre, String fechaVencimiento, double precio, int stock) {
+	public ProductosLlevar(String nombre, String fechaVencimiento, double precio, int cant) {
 		super();
 		this.nombre = nombre;
 		this.fechaVencimiento = fechaVencimiento;
 		this.precio = precio;
-		this.stock = stock;
+		this.cant = cant;
 	}
 
 
@@ -52,20 +53,15 @@ public class Productos {
 
 
 	public int getStock() {
-		return stock;
+		return cant;
 	}
 
 	public void setStock(int stock) {
-		this.stock = stock;
+		this.cant = stock;
 	}
 	
-	public void VolverStock(int c)
-	{	
-		stock += c;
-	}
-	
-	public void ConsumirStock(int c)
+	public void PrecioTotal(int c)
 	{
-		stock -=c;
+		precioListar += precio * c;
 	}
 }
