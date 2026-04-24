@@ -94,7 +94,7 @@ public class V1 extends JFrame implements ActionListener {
 		contentPane.add(txtC);
 
 		JLabel lblNewLabel_3 = new JLabel("Cantidad:");
-		lblNewLabel_3.setBounds(10, 91, 91, 12);
+		lblNewLabel_3.setBounds(10, 94, 91, 12);
 		contentPane.add(lblNewLabel_3);
 
 		txtS = new JTextArea();
@@ -138,6 +138,17 @@ public class V1 extends JFrame implements ActionListener {
 			txtNN.setBounds(112, 119, 96, 18);
 			contentPane.add(txtNN);
 		}
+		{
+			lblNewLabel_6 = new JLabel("Nueva cantidad:");
+			lblNewLabel_6.setBounds(10, 145, 91, 12);
+			contentPane.add(lblNewLabel_6);
+		}
+		{
+			txtNC = new JTextField();
+			txtNC.setColumns(10);
+			txtNC.setBounds(112, 145, 96, 18);
+			contentPane.add(txtNC);
+		}
 
 		cabezal(true);
 		ListarProdcutos(true);
@@ -156,6 +167,8 @@ public class V1 extends JFrame implements ActionListener {
 	private JButton btnEliminar;
 	private JLabel lblNewLabel_5;
 	private JTextField txtNN;
+	private JLabel lblNewLabel_6;
+	private JTextField txtNC;
 
 	public void ListarProdcutos(boolean op) {
 		if (op) {
@@ -198,31 +211,36 @@ public class V1 extends JFrame implements ActionListener {
 	}
 
 	protected void do_btnAdicionar_actionPerformed(ActionEvent e) {
-		if (txtNP.getText().trim().isEmpty() && txtC.getText().trim().isEmpty())
-			JOptionPane.showMessageDialog(this, "Debe rellenar todos cuadros de Nombre producto y Cantidad");
-		else if (txtNP.getText().trim().isEmpty())
-			JOptionPane.showMessageDialog(this, "Debe ingresar un nombre de producto");
-		else if (txtC.getText().trim().isEmpty())
-			JOptionPane.showMessageDialog(this, "Debe ingresar la cantidad a llevar");
-		else {
-			String nom = txtNP.getText();
-			int cant = Integer.parseInt(txtC.getText());
-			Productos nb = AP.Buscar(nom);
+		try {
+			if (txtNP.getText().trim().isEmpty() && txtC.getText().trim().isEmpty())
+				JOptionPane.showMessageDialog(this, "Debe rellenar todos cuadros de Nombre producto y Cantidad");
+			else if (txtNP.getText().trim().isEmpty())
+				JOptionPane.showMessageDialog(this, "Debe ingresar un nombre de producto");
+			else if (txtC.getText().trim().isEmpty())
+				JOptionPane.showMessageDialog(this, "Debe ingresar la cantidad a llevar");
+			else {
+				String nom = txtNP.getText();
+				int cant = Integer.parseInt(txtC.getText());
+				Productos nb = AP.Buscar(nom, cant);
 
-			if (nb != null) {
-				ProductosLlevar p = new ProductosLlevar(nb.getNombre(), nb.getFechaVencimiento(), nb.getPrecio(), cant);
-				p.PrecioTotal(cant);
-				PL.Adicionar(p);
-				nb.ConsumirStock(cant);
-				txtS.setText("");
-				cabezal(true);
-				ListarProdcutos(true);
+				if (nb != null) {
+					ProductosLlevar p = new ProductosLlevar(nb.getNombre(), nb.getFechaVencimiento(), nb.getPrecio(),
+							cant);
+					p.PrecioTotal(cant);
+					PL.Adicionar(p);
+					nb.ConsumirStock(cant);
+					txtS.setText("");
+					cabezal(true);
+					ListarProdcutos(true);
 
-				JOptionPane.showMessageDialog(this, "Se ha adicionado el producto " + nom + " correctamente");
-			} else {
-				JOptionPane.showMessageDialog(this,
-						"El producto " + nom + " no se encuentra en nuestra lista o no existe");
+					JOptionPane.showMessageDialog(this, "Se ha adicionado el producto " + nom + " correctamente");
+				} else {
+					JOptionPane.showMessageDialog(this,
+							"El producto " + nom + " no se encuentra en nuestra lista o no hay stock suficiente\"");
+				}
 			}
+		} catch (Exception m) {
+			JOptionPane.showMessageDialog(this, "La cantidad debe ser un número entero");
 		}
 	}
 
@@ -257,36 +275,149 @@ public class V1 extends JFrame implements ActionListener {
 			return;
 		}
 
-		if (txtNN.getText().trim().isEmpty()) {
-			JOptionPane.showMessageDialog(this, "Debe ingresar el nuevo nombre");
-			return;
-		} else {
+		String nom = txtNP.getText().trim();
+		String nomNue = txtNN.getText().trim();
+		String cantNuevaTexto = txtNC.getText().trim();
 
-			String nom = txtNP.getText().trim();
-			String nomNue = txtNN.getText().trim();
-			ProductosLlevar npPL = PL.Buscar(nom);
-			Productos nbAP = AP.Buscar(nom);
-			Productos nbAP2 = AP.Buscar(nomNue);
+		try {
+			if (!nomNue.isEmpty() && !cantNuevaTexto.isEmpty()) {
+				int nuevaCant = Integer.parseInt(cantNuevaTexto);
 
-			if (npPL == null) {
-				JOptionPane.showMessageDialog(this, "El producto " + nom + " no se encuentra en la lista o no existe");
-				return;
+				if (nuevaCant <= 0) {
+					JOptionPane.showMessageDialog(this, "La nueva cantidad debe ser mayor que cero");
+					return;
+				}
+
+				ProductosLlevar nPL = PL.Buscar(nom);
+				Productos nAP = AP.Buscar(nom);
+
+				if (nPL == null) {
+					JOptionPane.showMessageDialog(this, "El producto " + nom + " no se encuentra en la lista");
+					return;
+				}
+
+				if (nAP == null) {
+					JOptionPane.showMessageDialog(this, "El producto original no existe en el stock general");
+					return;
+				}
+
+				int antiguaCant = nPL.getStock();
+
+				nAP.VolverStock(antiguaCant);
+
+				Productos nAP2 = AP.Buscar(nomNue, nuevaCant);
+
+				if (nAP2 == null) {
+
+					nAP.ConsumirStock(antiguaCant);
+
+					JOptionPane.showMessageDialog(this, "El nuevo producto no existe o no hay stock suficiente");
+					return;
+				}
+
+				nPL.setNombre(nomNue);
+				nPL.setStock(nuevaCant);
+				nAP2.ConsumirStock(nuevaCant);
+
+				JOptionPane.showMessageDialog(this, "Producto modificado correctamente");
 			}
 
-			npPL.setNombre(nomNue);
-			nbAP.VolverStock(npPL.getStock());
-			nbAP2.ConsumirStock(npPL.getStock());
+			else if (!nomNue.isEmpty() && cantNuevaTexto.isEmpty()) {
+				ProductosLlevar npPL = PL.Buscar(nom);
+				Productos nbAP = AP.Buscar(nom);
+
+				if (npPL == null) {
+					JOptionPane.showMessageDialog(this, "El producto " + nom + " no se encuentra en la lista");
+					return;
+				}
+
+				if (nbAP == null) {
+					JOptionPane.showMessageDialog(this, "El producto original no existe en el stock general");
+					return;
+				}
+
+				int cantidadActual = npPL.getStock();
+
+				nbAP.VolverStock(cantidadActual);
+
+				Productos nbAP2 = AP.Buscar(nomNue, cantidadActual);
+
+				if (nbAP2 == null) {
+
+					nbAP.ConsumirStock(cantidadActual);
+
+					JOptionPane.showMessageDialog(this, "El nuevo producto no existe o no tiene stock suficiente");
+					return;
+				}
+
+				npPL.setNombre(nomNue);
+				nbAP2.ConsumirStock(cantidadActual);
+
+				JOptionPane.showMessageDialog(this, "Nombre del producto modificado correctamente");
+			}
+
+			else if (!cantNuevaTexto.isEmpty() && nomNue.isEmpty()) {
+				int nuevaCant = Integer.parseInt(cantNuevaTexto);
+
+				if (nuevaCant <= 0) {
+					JOptionPane.showMessageDialog(this, "La nueva cantidad debe ser mayor que cero");
+					return;
+				}
+
+				ProductosLlevar ncPL = PL.Buscar(nom);
+				Productos ncAP = AP.Buscar(nom);
+
+				if (ncPL == null) {
+					JOptionPane.showMessageDialog(this, "El producto " + nom + " no se encuentra en la lista");
+					return;
+				}
+
+				if (ncAP == null) {
+					JOptionPane.showMessageDialog(this, "El producto no existe en el stock general");
+					return;
+				}
+
+				int antiguaCant = ncPL.getStock();
+
+				ncAP.VolverStock(antiguaCant);
+
+				Productos productoValidado = AP.Buscar(nom, nuevaCant);
+
+				if (productoValidado == null) {
+
+					ncAP.ConsumirStock(antiguaCant);
+
+					JOptionPane.showMessageDialog(this, "No hay stock suficiente para la nueva cantidad");
+					return;
+				}
+
+				ncPL.setStock(nuevaCant);
+				productoValidado.ConsumirStock(nuevaCant);
+
+				JOptionPane.showMessageDialog(this, "Cantidad modificada correctamente");
+			}
+
+			else {
+				JOptionPane.showMessageDialog(this, "Debe ingresar un nuevo nombre o una nueva cantidad");
+				return;
+			}
 
 			txtPL.setText("");
 			cabezal(false);
 			ListarProdcutos(false);
+
 			txtS.setText("");
 			cabezal(true);
 			ListarProdcutos(true);
+
+		} catch (NumberFormatException ex) {
+			JOptionPane.showMessageDialog(this, "La nueva cantidad debe ser un número entero");
 		}
 	}
 
 	protected void do_btnEliminar_actionPerformed(ActionEvent e) {
+		try
+		{
 		if (txtNP.getText().trim().isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Debe ingresar un nombre de producto");
 			return;
@@ -295,18 +426,22 @@ public class V1 extends JFrame implements ActionListener {
 			String nom = txtNP.getText().trim();
 
 			int index = PL.BuscarPosicion(nom);
-			ProductosLlevar bpPL = PL.Buscar(nom); 
-			Productos bpAP = AP.Buscar(nom); 
-			
+			ProductosLlevar bpPL = PL.Buscar(nom);
+			Productos bpAP = AP.Buscar(nom);
+
 			bpAP.VolverStock(bpPL.getStock());
 			PL.Eliminar(index);
-			
+
 			txtPL.setText("");
 			cabezal(false);
 			ListarProdcutos(false);
 			txtS.setText("");
 			cabezal(true);
 			ListarProdcutos(true);
+		}
+		}catch(Exception m)
+		{
+			JOptionPane.showMessageDialog(this, "El nombre de producto no puede contener enteros");
 		}
 	}
 }

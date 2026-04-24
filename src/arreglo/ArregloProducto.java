@@ -55,4 +55,18 @@ public class ArregloProducto {
 		
 		return null;
 	}
+	public Productos Buscar(String nom, int cantidad)
+	{
+	    for (int i = 0; i < Tamaño(); i++)
+	    {
+	        Productos p = Obtener(i);
+
+	        if (nom.equalsIgnoreCase(p.getNombre()) && p.getStock() >= cantidad)
+	        {
+	            return p;
+	        }
+	    }
+
+	    return null;
+	}
 }
