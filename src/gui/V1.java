@@ -255,18 +255,24 @@ public class V1 extends JFrame implements ActionListener {
 	}
 
 	protected void do_btnBuscar_actionPerformed(ActionEvent e) {
-		if (txtNP.getText().trim().isEmpty())
-			JOptionPane.showMessageDialog(this, "Debe ingresar un nombre de producto");
-		else {
-			String nom = txtNP.getText();
-			ProductosLlevar bp = PL.Buscar(nom);
+		try {
+			if (txtNP.getText().trim().isEmpty())
+				JOptionPane.showMessageDialog(this, "Debe ingresar un nombre de producto");
+			else {
+				String nom = txtNP.getText();
+				ProductosLlevar bp = PL.Buscar(nom);
 
-			if (bp != null) {
-				JOptionPane.showMessageDialog(this, "EL producto " + nom + " se encuentra en la lista");
-			} else {
-				JOptionPane.showMessageDialog(this, "EL producto " + nom + " no se encuentra en la lista o no existe");
+				if (bp != null) {
+					JOptionPane.showMessageDialog(this, "EL producto " + nom + " se encuentra en la lista");
+				} else {
+					JOptionPane.showMessageDialog(this,
+							"EL producto " + nom + " no se encuentra en la lista o no existe");
+				}
 			}
+		} catch (Exception m) {
+			JOptionPane.showMessageDialog(this, "Se genero un error: " + m);
 		}
+
 	}
 
 	protected void do_btnModificar_actionPerformed(ActionEvent e) {
@@ -416,31 +422,29 @@ public class V1 extends JFrame implements ActionListener {
 	}
 
 	protected void do_btnEliminar_actionPerformed(ActionEvent e) {
-		try
-		{
-		if (txtNP.getText().trim().isEmpty()) {
-			JOptionPane.showMessageDialog(this, "Debe ingresar un nombre de producto");
-			return;
-		} else {
+		try {
+			if (txtNP.getText().trim().isEmpty()) {
+				JOptionPane.showMessageDialog(this, "Debe ingresar un nombre de producto");
+				return;
+			} else {
 
-			String nom = txtNP.getText().trim();
+				String nom = txtNP.getText().trim();
 
-			int index = PL.BuscarPosicion(nom);
-			ProductosLlevar bpPL = PL.Buscar(nom);
-			Productos bpAP = AP.Buscar(nom);
+				int index = PL.BuscarPosicion(nom);
+				ProductosLlevar bpPL = PL.Buscar(nom);
+				Productos bpAP = AP.Buscar(nom);
 
-			bpAP.VolverStock(bpPL.getStock());
-			PL.Eliminar(index);
+				bpAP.VolverStock(bpPL.getStock());
+				PL.Eliminar(index);
 
-			txtPL.setText("");
-			cabezal(false);
-			ListarProdcutos(false);
-			txtS.setText("");
-			cabezal(true);
-			ListarProdcutos(true);
-		}
-		}catch(Exception m)
-		{
+				txtPL.setText("");
+				cabezal(false);
+				ListarProdcutos(false);
+				txtS.setText("");
+				cabezal(true);
+				ListarProdcutos(true);
+			}
+		} catch (Exception m) {
 			JOptionPane.showMessageDialog(this, "El nombre de producto no puede contener enteros");
 		}
 	}
